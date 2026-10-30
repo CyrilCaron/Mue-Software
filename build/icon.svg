@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="lin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef0e6"/><stop offset="1" stop-color="#e4dff4"/></linearGradient>
+    <linearGradient id="lilas" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7ee0"/><stop offset="1" stop-color="#5a4bc0"/></linearGradient>
+  </defs>
+  <!-- Grille d'icône macOS : forme de 824 px centrée dans 1024 -->
+  <g transform="translate(100 100) scale(0.8046875)">
+    <path d="M512 0C870 0 1024 154 1024 512S870 1024 512 1024 0 870 0 512 154 0 512 0Z" fill="url(#lin)"/>
+    <path d="M292 740V300L512 560" fill="none" stroke="#4f7a45" stroke-width="104" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <path d="M512 560C560 450 610 330 680 330C716 330 732 360 732 410V740" fill="none" stroke="url(#lilas)" stroke-width="104" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

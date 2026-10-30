@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'">
+  <title>Mue</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-space="images">
+  <div class="frame">
+    <nav class="side">
+      <div class="drag-zone"></div>
+      <div class="word">
+        <svg viewBox="200 220 620 600" aria-hidden="true"><path d="M292 740V300L512 560" fill="none" stroke="var(--good)" stroke-width="110" stroke-linejoin="miter" stroke-miterlimit="10"/><path d="M512 560C560 450 610 330 680 330C716 330 732 360 732 410V740" fill="none" stroke="var(--accent)" stroke-width="110" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Mue
+      </div>
+      <button class="it on" data-module="images">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 11l3.5-3 3 2.5 2-1.5 3.5 3"/></svg>Images
+      </button>
+      <button class="it" data-module="pdf">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h5l3 3v9H4z"/><path d="M9 2v3h3"/></svg>PDF
+      </button>
+      <button class="it" data-module="video">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="9" height="8" rx="1.5"/><path d="M11 7l3-2v6l-3-2"/></svg>Vidéo
+      </button>
+      <div class="grp images-only">Préréglages</div>
+      <div id="presets" class="images-only">
+        <button class="it preset" data-preset="web">Pour le web</button>
+        <button class="it preset" data-preset="mail">Pour un e-mail</button>
+        <button class="it preset" data-preset="max">Qualité maximale</button>
+        <div id="userPresets"></div>
+        <button class="it add-preset" id="savePresetBtn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>Nouveau préréglage
+        </button>
+        <form class="preset-form" id="presetForm" hidden>
+          <input type="text" id="presetName" placeholder="Nom du préréglage" maxlength="40">
+        </form>
+      </div>
+      <button class="it settings-btn" id="settingsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Réglages
+      </button>
+    </nav>
+
+    <main class="card soon-card" id="soonCard" hidden>
+      <header class="tb"><h1 id="soonTitle"></h1></header>
+      <div class="soon-view">
+        <div class="mark" id="soonMark"></div>
+        <h2>Bientôt dans Mue</h2>
+        <p id="soonText"></p>
+      </div>
+    </main>
+
+    <main class="card" id="card">
+      <header class="tb">
+        <h1>Images</h1>
+        <div class="seg tabs" id="imgTab"><button data-v="convert">Convertir</button><button data-v="denoise">Réduire le bruit</button><button data-v="crop">Recadrer</button></div>
+        <span class="n" id="count"></span>
+        <button class="pill ghost" id="clearBtn" hidden>Tout retirer</button>
+        <button class="pill" id="addBtn">Ajouter</button>
+      </header>
+
+      <div class="empty" id="empty">
+        <svg viewBox="0 0 120 120" width="92" height="92" aria-hidden="true">
+          <rect x="18" y="18" width="84" height="84" rx="20" fill="none" stroke="var(--muted)" stroke-width="3" stroke-dasharray="9 7" stroke-linecap="round" opacity=".7"/>
+          <circle cx="60" cy="60" r="22" fill="var(--accent)" opacity=".9"/>
+        </svg>
+        <h2>Glisse tes images ici</h2>
+        <p>Des fichiers ou des dossiers entiers. JPEG, PNG, WebP, AVIF, HEIC, TIFF, GIF, BMP et SVG.</p>
+        <button class="pill strong" id="emptyAddBtn">Choisir des images</button>
+      </div>
+
+      <div class="tbl" id="tblWrap" hidden>
+        <table>
+          <thead><tr><th class="c-name">Nom</th><th class="c-dim">Dimensions</th><th class="r c-size">Poids</th><th class="r c-gain" id="gainHead">Gain</th><th class="c-x"></th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <section class="editor" id="editor" hidden>
+        <div class="stage" id="stage">
+          <div class="frame-img" id="frameImg">
+            <img id="edImg" alt="">
+            <div class="crop" id="cropBox">
+              <div class="thirds"></div>
+              <i data-h="nw"></i><i data-h="n"></i><i data-h="ne"></i><i data-h="e"></i><i data-h="se"></i><i data-h="s"></i><i data-h="sw"></i><i data-h="w"></i>
+            </div>
+          </div>
+          <div class="pv-note" id="edNote">Sélectionne une image dans la liste.</div>
+        </div>
+        <p class="hint">Fais glisser le cadre ou ses poignées. Les retouches sont propres à chaque image.</p>
+      </section>
+
+      <section class="preview" id="preview" hidden>
+        <div class="cmp" id="cmp" style="--split: 50%">
+          <img id="pvBefore" alt="Avant">
+          <div class="after"><img id="pvAfter" alt="Après"></div>
+          <div class="handle"></div>
+          <span class="tag l">Avant</span><span class="tag r">Après</span>
+          <input type="range" id="pvSplit" min="0" max="100" value="50" aria-label="Comparer avant et après">
+          <div class="pv-note" id="pvNote">Sélectionne une image pour voir l'aperçu.</div>
+        </div>
+        <p class="hint">Aperçu à taille réelle, zone : <span class="zones" id="pvZones"><button data-v="0.5,0.5">centre</button><button data-v="0.5,0.2">haut</button><button data-v="0.5,0.8">bas</button><button data-v="0.2,0.5">gauche</button><button data-v="0.8,0.5">droite</button></span></p>
+      </section>
+    </main>
+
+    <main class="card pdf-card" id="pdfCard" hidden>
+      <header class="tb">
+        <h1>PDF</h1>
+        <div class="seg tabs" id="pdfTab"><button data-v="read">Lire</button><button data-v="organize">Organiser</button><button data-v="split">Découper</button><button data-v="compress">Compresser</button><button data-v="convert">Convertir</button></div>
+        <span class="n" id="pdfCount"></span>
+        <button class="pill ghost" id="pdfClear" hidden>Tout retirer</button>
+        <button class="pill" id="pdfAdd">Ajouter</button>
+      </header>
+
+      <div class="empty" id="pdfEmpty">
+        <svg viewBox="0 0 120 120" width="92" height="92" aria-hidden="true">
+          <path d="M34 16h36l20 20v68H34z" fill="none" stroke="var(--muted)" stroke-width="3" stroke-dasharray="9 7" stroke-linejoin="round" opacity=".7"/>
+          <rect x="48" y="52" width="40" height="50" rx="4" fill="var(--accent)" opacity=".9"/>
+        </svg>
+        <h2 id="pdfEmptyTitle">Glisse tes PDF ici</h2>
+        <p id="pdfEmptyText">Un ou plusieurs fichiers, ou un dossier entier.</p>
+        <button class="pill strong" id="pdfEmptyAdd">Choisir des fichiers</button>
+      </div>
+
+      <div class="pages" id="pdfPages" hidden></div>
+
+      <section class="viewer" id="viewer" hidden>
+        <div class="vbar">
+          <select id="vDoc" aria-label="Document affiché"></select>
+          <label class="vpage">Page <input id="vPageIn" type="number" min="1" value="1"><span id="vPageCount">/ 1</span></label>
+          <div class="vzoom">
+            <button id="vZoomOut" title="Dézoomer" aria-label="Dézoomer">−</button><span id="vZoomV">100 %</span><button id="vZoomIn" title="Zoomer" aria-label="Zoomer">+</button>
+            <button class="link small" id="vFit">Ajuster</button>
+          </div>
+          <div class="vsearch">
+            <input id="vSearch" type="search" placeholder="Rechercher dans le PDF" spellcheck="false">
+            <span id="vHits"></span>
+            <button id="vPrev" title="Résultat précédent" aria-label="Résultat précédent">‹</button><button id="vNext" title="Résultat suivant" aria-label="Résultat suivant">›</button>
+          </div>
+        </div>
+        <div class="vbody">
+          <div class="vthumbs" id="vThumbs"></div>
+          <div class="vpages" id="vPages"></div>
+        </div>
+      </section>
+
+      <div class="tbl" id="pdfTblWrap" hidden>
+        <table>
+          <thead><tr><th class="c-name">Nom</th><th class="c-dim">Pages</th><th class="r c-size">Poids</th><th class="r c-gain" id="pdfStateHead">État</th><th class="c-x"></th></tr></thead>
+          <tbody id="pdfRows"></tbody>
+        </table>
+        <p class="hint tbl-note" id="pdfHidden" hidden></p>
+      </div>
+    </main>
+
+    <main class="card video-card" id="videoCard" hidden>
+      <header class="tb">
+        <h1>Vidéo</h1>
+        <span class="n" id="vidCount"></span>
+        <button class="pill ghost" id="vidClear" hidden>Tout retirer</button>
+        <button class="pill" id="vidAdd">Ajouter</button>
+      </header>
+      <div class="empty" id="vidEmpty">
+        <svg viewBox="0 0 120 120" width="92" height="92" aria-hidden="true">
+          <rect x="16" y="30" width="70" height="60" rx="12" fill="none" stroke="var(--muted)" stroke-width="3" stroke-dasharray="9 7" opacity=".7"/>
+          <path d="M86 52l20-12v40L86 68z" fill="var(--accent)" opacity=".9"/>
+        </svg>
+        <h2>Glisse tes vidéos ici</h2>
+        <p>MP4, MOV, MKV, AVI, WebM, MTS… Un fichier, plusieurs, ou un dossier entier.</p>
+        <button class="pill strong" id="vidEmptyAdd">Choisir des vidéos</button>
+      </div>
+      <div class="tbl vid-tbl" id="vidTblWrap" hidden>
+        <table>
+          <thead><tr><th class="c-name">Nom</th><th class="c-dur">Durée</th><th class="c-dim">Dimensions</th><th class="r c-size">Poids</th><th class="r c-state">État</th><th class="c-x"></th></tr></thead>
+          <tbody id="vidRows"></tbody>
+        </table>
+      </div>
+      <section class="vid-detail" id="vidDetail" hidden>
+        <div class="vid-preview">
+          <div class="vid-frame"><img id="vidImg" alt=""><span class="pv-note" id="vidNote">Chargement…</span></div>
+          <div class="vid-scrub">
+            <span id="vidTime">0:00</span>
+            <input type="range" id="vidAt" min="0" max="1000" value="250" aria-label="Moment affiché">
+            <span id="vidDur">0:00</span>
+          </div>
+        </div>
+        <div class="vid-tracks">
+          <div class="f">
+            <b>Découper</b>
+            <div class="trim">
+              <label class="field"><span>Début</span><input type="text" id="vidStart" placeholder="0:00" spellcheck="false"></label>
+              <button class="link small" id="vidSetStart">Ici</button>
+              <label class="field"><span>Fin</span><input type="text" id="vidEnd" placeholder="fin" spellcheck="false"></label>
+              <button class="link small" id="vidSetEnd">Ici</button>
+            </div>
+          </div>
+          <div class="f"><b>Pistes audio</b><div class="sub" id="vidAudio"></div></div>
+          <div class="f"><b>Sous-titres</b><div class="sub" id="vidSubs"></div><button class="link small" id="vidAddSubs">Ajouter un fichier de sous-titres…</button></div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="insp" id="videoInsp" hidden>
+      <div class="drag-zone"></div>
+      <div class="insp-scroll">
+        <div class="f">
+          <b>Préréglage</b>
+          <label class="field select"><select id="vsPreset"></select></label>
+        </div>
+        <details class="sec" open><summary>Format</summary>
+          <div class="seg" id="vsFormat"><button data-v="mp4">MP4</button><button data-v="mkv">MKV</button><button data-v="webm">WebM</button><button data-v="mov">MOV</button></div>
+          <p class="hint" id="vsFormatHint"></p>
+        </details>
+        <details class="sec" open><summary>Dimensions</summary>
+          <div class="f"><b>Résolution</b><div class="seg" id="vsHeight"><button data-v="same">Originale</button><button data-v="2160">4K</button><button data-v="1080">1080p</button><button data-v="720">720p</button><button data-v="480">480p</button></div></div>
+          <div class="f"><b>Rognage</b><div class="seg" id="vsCrop"><button data-v="auto">Auto</button><button data-v="none">Aucun</button><button data-v="custom">Manuel</button></div>
+            <div class="crop4" id="vsCropFields" hidden>
+              <label class="field"><span>Haut</span><input type="number" min="0" data-c="top"></label>
+              <label class="field"><span>Bas</span><input type="number" min="0" data-c="bottom"></label>
+              <label class="field"><span>Gauche</span><input type="number" min="0" data-c="left"></label>
+              <label class="field"><span>Droite</span><input type="number" min="0" data-c="right"></label>
+            </div>
+            <p class="hint" id="vsCropHint"></p>
+          </div>
+          <div class="f"><b>Orientation</b>
+            <div class="tools" id="vsRotate">
+              <button data-a="left" title="Pivoter à gauche"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a7 7 0 1 1 1.5 6.5"/><path d="M4 3.5V8h4.5"/></svg></button>
+              <button data-a="right" title="Pivoter à droite"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a7 7 0 1 0-1.5 6.5"/><path d="M16 3.5V8h-4.5"/></svg></button>
+              <button data-a="flip" title="Miroir horizontal"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 2v16" stroke-dasharray="2 2"/><path d="M7.5 5L2.5 15h5zM12.5 5l5 10h-5z"/></svg></button>
+              <button data-a="reset" title="Remettre droit"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+            </div>
+          </div>
+        </details>
+        <details class="sec"><summary>Filtres</summary>
+          <div class="f"><b>Désentrelacer</b><div class="seg" id="vsDeint"><button data-v="auto">Auto</button><button data-v="off">Non</button><button data-v="on">Oui</button></div></div>
+          <div class="f"><b>Réduire le bruit</b><div class="seg" id="vsDenoise"><button data-v="off">Non</button><button data-v="light">Léger</button><button data-v="medium">Moyen</button><button data-v="strong">Fort</button></div></div>
+          <div class="f"><b>Netteté</b><div class="seg" id="vsSharpen"><button data-v="off">Non</button><button data-v="light">Légère</button><button data-v="medium">Moyenne</button></div></div>
+          <label class="chk"><span>Noir et blanc</span><input type="checkbox" id="vsGray"><i></i></label>
+        </details>
+        <details class="sec" open><summary>Vidéo</summary>
+          <div class="f"><b>Codec</b>
+            <div class="seg grid4" id="vsCodec"><button data-v="h264">H.264</button><button data-v="hevc">H.265</button><button data-v="av1">AV1</button><button data-v="vp9">VP9</button><button data-v="h264_hw">H.264 Apple</button><button data-v="hevc_hw">H.265 Apple</button><button data-v="prores">ProRes</button><button data-v="copy">Copie</button></div>
+            <p class="hint" id="vsCodecHint"></p>
+          </div>
+          <div class="f"><b>Images par seconde</b><div class="seg" id="vsFps"><button data-v="same">Identique</button><button data-v="24">24</button><button data-v="25">25</button><button data-v="30">30</button><button data-v="60">60</button></div></div>
+          <div class="f" id="vsQualityF"><b>Taille du fichier</b><div class="seg" id="vsMode"><button data-v="quality">Qualité</button><button data-v="bitrate">Débit</button><button data-v="size">Taille visée</button></div>
+            <div class="sub" id="vsQualityBox">
+              <div class="label-row"><span class="muted" id="vsRfLabel">RF</span><span class="value" id="vsRfV"></span></div>
+              <input type="range" id="vsRf" min="14" max="40" step="1">
+              <div class="ends"><span>Meilleure qualité</span><span>Plus léger</span></div>
+            </div>
+            <label class="field" id="vsBitrateBox" hidden><span>Débit vidéo</span><input type="number" id="vsBitrate" min="200" step="100"><em>kb/s</em></label>
+            <label class="field" id="vsSizeBox" hidden><span>Poids visé</span><input type="number" id="vsSize" min="1" step="1"><em>Mo</em></label>
+          </div>
+          <div class="f" id="vsSpeedF"><b>Vitesse d'encodage</b><div class="seg" id="vsSpeed"><button data-v="fast">Rapide</button><button data-v="medium">Normale</button><button data-v="slow">Lente</button></div><p class="hint">Plus lent donne un fichier un peu plus léger à qualité égale.</p></div>
+        </details>
+        <details class="sec"><summary>Audio</summary>
+          <div class="f"><b>Codec</b><div class="seg" id="vsAcodec"><button data-v="aac">AAC</button><button data-v="opus">Opus</button><button data-v="mp3">MP3</button><button data-v="ac3">AC3</button><button data-v="flac">FLAC</button><button data-v="copy">Copie</button></div></div>
+          <div class="f" id="vsAbrF"><b>Débit par piste</b><div class="seg" id="vsAbr"><button data-v="96">96</button><button data-v="128">128</button><button data-v="160">160</button><button data-v="192">192</button><button data-v="256">256</button></div></div>
+          <div class="f"><b>Canaux</b><div class="seg" id="vsMix"><button data-v="same">Identiques</button><button data-v="mono">Mono</button><button data-v="stereo">Stéréo</button><button data-v="5.1">5.1</button></div></div>
+          <label class="chk"><span>Normaliser le volume<small>Niveau sonore homogène (EBU R128)</small></span><input type="checkbox" id="vsNorm"><i></i></label>
+        </details>
+        <details class="sec"><summary>Chapitres et infos</summary>
+          <label class="chk"><span>Garder les chapitres</span><input type="checkbox" id="vsChapters"><i></i></label>
+          <label class="chk"><span>Garder les métadonnées<small>Titre, date, lieu de tournage…</small></span><input type="checkbox" id="vsMeta"><i></i></label>
+          <label class="chk"><span>Garder les sous-titres par défaut<small>Pour les vidéos ajoutées ensuite</small></span><input type="checkbox" id="vsSubsDefault"><i></i></label>
+        </details>
+        <div class="f">
+          <b>Enregistrer</b>
+          <div class="seg" id="vsOut"><button data-v="subfolder">À côté</button><button data-v="custom">Ailleurs…</button></div>
+          <p class="hint" id="vsOutHint"></p>
+        </div>
+      </div>
+      <div class="shed">
+        <div class="vid-total" id="vidTotal" hidden><div class="bar"><i id="vidTotalBar"></i></div><span id="vidTotalText"></span></div>
+        <div class="nums"><span id="vidStatus"></span></div>
+        <button class="cta" id="vidGo" disabled>Convertir</button>
+        <button class="link" id="vidStop" hidden>Annuler</button>
+        <button class="link" id="vidReveal" hidden>Afficher dans le Finder</button>
+      </div>
+    </aside>
+
+    <aside class="insp" id="pdfInsp" hidden>
+      <div class="drag-zone"></div>
+      <div class="insp-scroll">
+        <div class="pdf-mode" data-mode="read">
+          <div class="f">
+            <b>Outil</b>
+            <div class="tools tools6" id="vTools">
+              <button data-t="select" title="Sélectionner et déplacer"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l11 7-5 1.2L8.5 16z"/></svg></button>
+              <button data-t="highlight" title="Surligner"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h12"/><path d="M6.5 12.5l6-8 3 2.2-6 8H6.5z"/></svg></button>
+              <button data-t="text" title="Ajouter du texte"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5V3.5h12V5M10 3.5v13M7.5 16.5h5"/></svg></button>
+              <button data-t="note" title="Ajouter une note"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v9H9l-4 3.5V13H4z"/></svg></button>
+              <button data-t="ink" title="Dessiner"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 14c2-4 4-6 5.5-4.5S8 15 11 13s3.5-7 5.5-7"/></svg></button>
+              <button data-t="sign" title="Signer"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5c2.5 0 3-6 5-6s.5 5 2.5 5 2-3 3.5-3 1.5 2 3 2"/><path d="M3 17.5h14"/></svg></button>
+            </div>
+            <p class="hint" id="vToolHint"></p>
+          </div>
+          <div class="f" id="vColorF">
+            <b>Couleur</b>
+            <div class="swatches" id="vColors">
+              <button data-v="#f5d34a" style="--c:#f5d34a" title="Jaune"></button><button data-v="#8fd18a" style="--c:#8fd18a" title="Vert"></button><button data-v="#f2a0c4" style="--c:#f2a0c4" title="Rose"></button><button data-v="#6a5acd" style="--c:#6a5acd" title="Lilas"></button><button data-v="#c0392b" style="--c:#c0392b" title="Rouge"></button><button data-v="#1d3a8a" style="--c:#1d3a8a" title="Bleu encre"></button><button data-v="#1d1f1a" style="--c:#1d1f1a" title="Noir"></button>
+            </div>
+          </div>
+          <div class="f" id="vSizeF">
+            <b><span id="vSizeLabel">Taille</span> <span id="vSizeV"></span></b>
+            <input type="range" id="vSize" min="1" max="48" value="14">
+          </div>
+          <div class="f" id="vSigF" hidden>
+            <b>Ma signature</b>
+            <div class="sigprev" id="vSigPrev">Aucune signature</div>
+            <button class="link small" id="vSigEdit">Créer ma signature</button>
+          </div>
+          <div class="row2"><button class="link small" id="vUndo">Annuler la dernière action</button><button class="link small danger" id="vDelete" hidden>Supprimer</button></div>
+          <div class="f" id="vFieldsF" hidden>
+            <b>Formulaire</b>
+            <div class="sub" id="vFields"></div>
+            <label class="chk"><span>Aplatir le formulaire<small>Les champs ne seront plus modifiables</small></span><input type="checkbox" id="vFlatten"><i></i></label>
+          </div>
+          <div class="f">
+            <label class="chk"><span>Protéger par un mot de passe<small>Demandé à l'ouverture du PDF</small></span><input type="checkbox" id="vProtect"><i></i></label>
+            <label class="field" id="vPassF" hidden><span>Mot de passe</span><input type="password" id="vPass" autocomplete="new-password"></label>
+          </div>
+        </div>
+
+        <div class="pdf-mode" data-mode="organize">
+          <div class="f">
+            <b>Pages sélectionnées <span id="pgSelCount">0</span></b>
+            <div class="tools" id="pgTools">
+              <button data-a="left" title="Pivoter à gauche"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a7 7 0 1 1 1.5 6.5"/><path d="M4 3.5V8h4.5"/></svg></button>
+              <button data-a="right" title="Pivoter à droite"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a7 7 0 1 0-1.5 6.5"/><path d="M16 3.5V8h-4.5"/></svg></button>
+              <button data-a="dup" title="Dupliquer"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="6.5" y="6.5" width="10" height="11" rx="1.5"/><path d="M13.5 4V3.5A1.5 1.5 0 0 0 12 2H5A1.5 1.5 0 0 0 3.5 3.5v10A1.5 1.5 0 0 0 5 15h1"/></svg></button>
+              <button data-a="delete" title="Supprimer" class="danger"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5h13M8 5.5V3.5h4v2M5.5 5.5l.8 11h7.4l.8-11"/></svg></button>
+            </div>
+            <div class="row2"><button class="link small" id="pgAll">Tout sélectionner</button><button class="link small" id="pgNone">Aucune</button></div>
+            <p class="hint">Clique pour sélectionner, Cmd ou Maj pour en prendre plusieurs. Fais glisser les pages pour changer leur ordre.</p>
+          </div>
+          <div class="f">
+            <b>Nom du fichier</b>
+            <label class="field"><input type="text" id="pgName" value="document" spellcheck="false"><em>.pdf</em></label>
+            <p class="hint">Toutes les pages, dans l'ordre affiché, dans un seul PDF. Pour garder seulement la sélection, utilise le bouton ci-dessous.</p>
+            <button class="link small" id="pgExtract">Enregistrer seulement la sélection</button>
+          </div>
+        </div>
+
+        <div class="pdf-mode" data-mode="split" hidden>
+          <div class="f">
+            <b>Découper</b>
+            <div class="seg" id="spMode"><button data-v="each">Chaque page</button><button data-v="every">Toutes les…</button><button data-v="ranges">Plages</button></div>
+            <label class="field" id="spEveryField" hidden><span>Toutes les</span><input type="number" id="spEvery" min="1" value="2"><em>pages</em></label>
+            <label class="field" id="spRangesField" hidden><span>Pages</span><input type="text" id="spRanges" placeholder="1-3, 5, 8-fin" spellcheck="false"></label>
+            <p class="hint" id="spHint"></p>
+          </div>
+        </div>
+
+        <div class="pdf-mode" data-mode="compress" hidden>
+          <div class="f">
+            <b>Compression</b>
+            <div class="seg" id="cpLevel"><button data-v="light">Légère</button><button data-v="medium">Moyenne</button><button data-v="strong">Forte</button></div>
+            <p class="hint" id="cpHint"></p>
+          </div>
+        </div>
+
+        <div class="pdf-mode" data-mode="convert" hidden>
+          <div class="f">
+            <b>Sens</b>
+            <div class="seg" id="cvDir"><button data-v="toImages">PDF → images</button><button data-v="toPdf">Images → PDF</button></div>
+          </div>
+          <div class="cv-images">
+            <div class="f">
+              <b>Format des images</b>
+              <div class="seg" id="cvFormat"><button data-v="jpeg">JPEG</button><button data-v="png">PNG</button><button data-v="webp">WebP</button></div>
+            </div>
+            <div class="f">
+              <b>Résolution</b>
+              <div class="seg" id="cvDpi"><button data-v="72">72 ppp</button><button data-v="150">150 ppp</button><button data-v="300">300 ppp</button></div>
+              <p class="hint">72 pour l'écran, 150 pour un usage courant, 300 pour imprimer.</p>
+            </div>
+            <div class="f" id="cvQualityF">
+              <b>Qualité <span id="cvQualityV">85</span></b>
+              <input type="range" id="cvQuality" min="30" max="100" value="85">
+            </div>
+            <p class="hint">Les images de chaque PDF vont dans un dossier « nom-pages ».</p>
+          </div>
+          <div class="cv-pdf" hidden>
+            <div class="f">
+              <b>Taille des pages</b>
+              <div class="seg" id="cvPage"><button data-v="a4">A4</button><button data-v="image">Taille de l'image</button></div>
+            </div>
+            <div class="f">
+              <b>Nom du fichier</b>
+              <label class="field"><input type="text" id="cvName" value="images" spellcheck="false"><em>.pdf</em></label>
+              <p class="hint">Une image par page, dans l'ordre de la liste.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="f">
+          <b>Enregistrer</b>
+          <div class="seg" id="pdfOut"><button data-v="subfolder">À côté</button><button data-v="custom">Ailleurs…</button></div>
+          <p class="hint" id="pdfOutHint"></p>
+        </div>
+      </div>
+
+      <div class="shed">
+        <div class="nums"><span id="pdfStatus"></span></div>
+        <button class="cta" id="pdfGo" disabled>Enregistrer</button>
+        <button class="link" id="pdfReveal" hidden>Afficher dans le Finder</button>
+      </div>
+    </aside>
+
+    <aside class="insp" id="insp">
+      <div class="drag-zone"></div>
+      <div class="insp-scroll">
+        <div class="mode-convert" id="inspConvert">
+        <div class="f">
+          <b>Format</b>
+          <div class="seg" id="format">
+            <button data-v="jpeg">JPEG</button><button data-v="png">PNG</button><button data-v="webp">WebP</button><button data-v="avif">AVIF</button><button data-v="tiff">TIFF</button>
+          </div>
+          <p class="hint" id="formatHint"></p>
+        </div>
+
+        <div class="f">
+          <b>Qualité <span id="qualityValue">80</span></b>
+          <input type="range" id="quality" min="1" max="100" value="80">
+          <div class="ends"><span>Plus léger</span><span>Plus net</span></div>
+        </div>
+
+        <div class="f">
+          <b>Taille</b>
+          <div class="seg" id="resizeMode">
+            <button data-v="none">Originale</button><button data-v="max">Pixels</button><button data-v="percent">Pourcentage</button>
+          </div>
+          <div class="sub" id="resizeMax" hidden>
+            <label class="field"><span>Largeur max</span><input type="number" id="maxW" min="1" placeholder="auto"><em>px</em></label>
+            <label class="field"><span>Hauteur max</span><input type="number" id="maxH" min="1" placeholder="auto"><em>px</em></label>
+            <p class="hint">Les proportions sont gardées et l'image n'est jamais agrandie.</p>
+          </div>
+          <div class="sub" id="resizePercent" hidden>
+            <label class="field"><span>Échelle</span><input type="number" id="percent" min="1" max="1000" value="50"><em>%</em></label>
+            <div class="chips" id="percentChips"><button data-v="25">25 %</button><button data-v="50">50 %</button><button data-v="75">75 %</button><button data-v="150">150 %</button></div>
+          </div>
+        </div>
+
+        <label class="chk"><span>Garder les métadonnées<small>Date, appareil, position GPS</small></span><input type="checkbox" id="keepMeta"><i></i></label>
+        </div>
+
+        <div class="mode-crop" id="inspCrop" hidden>
+          <div class="f">
+            <b>Proportions</b>
+            <div class="chips wrap" id="edRatio">
+              <button data-v="free">Libre</button><button data-v="orig">Originales</button><button data-v="1:1">1:1</button><button data-v="4:3">4:3</button><button data-v="3:2">3:2</button><button data-v="16:9">16:9</button><button data-v="4:5">4:5</button>
+            </div>
+            <button class="link small" id="edSwap">Passer en portrait / paysage</button>
+          </div>
+          <div class="f">
+            <b>Orientation</b>
+            <div class="tools" id="edTools">
+              <button data-a="left" title="Pivoter à gauche"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a7 7 0 1 1 1.5 6.5"/><path d="M4 3.5V8h4.5"/></svg></button>
+              <button data-a="right" title="Pivoter à droite"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a7 7 0 1 0-1.5 6.5"/><path d="M16 3.5V8h-4.5"/></svg></button>
+              <button data-a="flipH" title="Miroir horizontal"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 2v16" stroke-dasharray="2 2"/><path d="M7.5 5L2.5 15h5zM12.5 5l5 10h-5z"/></svg></button>
+              <button data-a="flipV" title="Miroir vertical"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2 10h16" stroke-dasharray="2 2"/><path d="M5 7.5L15 2.5v5zM5 12.5l10 5v-5z"/></svg></button>
+            </div>
+          </div>
+          <div class="f">
+            <b>Redresser <span id="edAngleV">0°</span></b>
+            <input type="range" id="edAngle" min="-20" max="20" step="0.1" value="0">
+            <div class="row2"><button class="pill" id="edAuto">Redresser automatiquement</button><button class="link small" id="edAngleZero">Remettre à 0</button></div>
+            <p class="hint" id="edAutoHint">Cherche l'horizon ou les lignes verticales de l'image.</p>
+          </div>
+          <div class="f">
+            <b>Format</b>
+            <div class="seg" id="edFormat"><button data-v="same">Identique</button><button data-v="jpeg">JPEG</button><button data-v="png">PNG</button><button data-v="webp">WebP</button><button data-v="tiff">TIFF</button></div>
+            <p class="hint">Chaque fichier garde son nom, suivi de « ‑recadre ».</p>
+          </div>
+          <div class="row2">
+            <button class="link small" id="edAutoAll">Redresser toutes les images</button>
+            <button class="link small danger" id="edReset">Annuler les retouches</button>
+          </div>
+        </div>
+
+        <div class="mode-denoise" id="inspDenoise" hidden>
+          <div class="f">
+            <b>Intensité</b>
+            <div class="seg" id="dnLevel"><button data-v="light">Légère</button><button data-v="medium">Moyenne</button><button data-v="strong">Forte</button></div>
+          </div>
+          <div class="f">
+            <b>Grain <span id="dnStrengthV"></span></b>
+            <input type="range" id="dnStrength" min="0" max="100">
+            <div class="ends"><span>Gardé</span><span>Lissé</span></div>
+          </div>
+          <div class="f">
+            <b>Taches de couleur <span id="dnColorV"></span></b>
+            <input type="range" id="dnColor" min="0" max="100">
+            <div class="ends"><span>Gardées</span><span>Effacées</span></div>
+          </div>
+          <div class="f">
+            <b>Détails conservés <span id="dnDetailV"></span></b>
+            <input type="range" id="dnDetail" min="0" max="100">
+            <div class="ends"><span>Moins</span><span>Plus</span></div>
+          </div>
+          <div class="f">
+            <b>Format</b>
+            <div class="seg" id="dnFormat"><button data-v="same">Identique</button><button data-v="jpeg">JPEG</button><button data-v="png">PNG</button><button data-v="webp">WebP</button><button data-v="tiff">TIFF</button></div>
+            <p class="hint">Chaque fichier garde son nom, suivi de « ‑net ».</p>
+          </div>
+        </div>
+
+        <div class="f">
+          <label class="chk"><span>Renommer les fichiers<small id="renameExample"></small></span><input type="checkbox" id="renameOn"><i></i></label>
+          <div class="sub" id="renameFields" hidden>
+            <label class="field"><span>Nom</span><input type="text" id="renameBase" value="photo"></label>
+            <label class="field"><span>Commencer à</span><input type="number" id="renameStart" min="0" value="1"></label>
+          </div>
+        </div>
+
+        <div class="f">
+          <b>Enregistrer</b>
+          <div class="seg" id="outMode">
+            <button data-v="subfolder">À côté</button><button data-v="custom">Ailleurs…</button>
+          </div>
+          <p class="hint" id="outHint"></p>
+        </div>
+      </div>
+
+      <div class="shed">
+        <div class="skin" id="skin"><div class="old"></div><div class="new" id="skinNew"></div></div>
+        <div class="nums"><span id="before">Aucune image</span><b id="after"></b></div>
+        <button class="cta" id="convertBtn" disabled>Convertir</button>
+        <button class="link" id="revealBtn" hidden>Afficher dans le Finder</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sheet-back" id="sheet" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <h2 id="sheetTitle">Réglages</h2>
+
+      <div class="f">
+        <b>Apparence</b>
+        <div class="seg" id="themeMode">
+          <button data-v="system">Automatique</button><button data-v="light">Clair</button><button data-v="dark">Sombre</button>
+        </div>
+        <p class="hint">Automatique suit le réglage du Mac.</p>
+      </div>
+
+      <div class="f">
+        <b>Enregistrer par défaut</b>
+        <div class="seg" id="defaultOut">
+          <button data-v="subfolder">À côté des images</button><button data-v="custom">Dans un dossier…</button>
+        </div>
+        <p class="hint" id="defaultOutHint"></p>
+      </div>
+
+      <div class="f">
+        <b>Mes préréglages</b>
+        <ul class="preset-list" id="presetList"></ul>
+      </div>
+
+      <div class="sheet-foot spread"><span class="hint" id="appVersion"></span><button class="pill strong" id="sheetClose">Terminé</button></div>
+    </section>
+  </div>
+
+  <div class="sheet-back" id="sigSheet" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sigTitle">
+      <h2 id="sigTitle">Ma signature</h2>
+      <div class="seg" id="sigMode"><button data-v="draw" class="on">Dessiner</button><button data-v="type">Écrire</button></div>
+      <div class="sig-pad"><canvas id="sigCanvas" width="760" height="260"></canvas><span class="sig-line"></span></div>
+      <label class="field" id="sigTypeF" hidden><span>Nom</span><input type="text" id="sigText" placeholder="Prénom Nom" spellcheck="false"></label>
+      <p class="hint">Ta signature reste enregistrée sur ce Mac pour les prochaines fois.</p>
+      <div class="sheet-foot spread"><button class="link small" id="sigClear">Effacer</button><span><button class="pill ghost" id="sigCancel">Annuler</button> <button class="pill strong" id="sigSave">Enregistrer</button></span></div>
+    </section>
+  </div>
+
+  <div class="sheet-back" id="pwSheet" hidden>
+    <form class="sheet" role="dialog" aria-modal="true" aria-labelledby="pwTitle" id="pwForm">
+      <h2 id="pwTitle">PDF protégé</h2>
+      <p class="hint" id="pwText"></p>
+      <label class="field"><span>Mot de passe</span><input type="password" id="pwInput" autocomplete="off"></label>
+      <p class="hint err" id="pwErr" hidden></p>
+      <div class="sheet-foot"><button type="button" class="pill ghost" id="pwCancel">Ignorer ce fichier</button> <button type="submit" class="pill strong">Ouvrir</button></div>
+    </form>
+  </div>
+
+  <div class="dropzone" id="dropzone"><div>Dépose pour ajouter</div></div>
+  <script src="app.js"></script>
+  <script src="pdf-space.js"></script>
+  <script src="pdf-viewer.js"></script>
+  <script src="video-space.js"></script>
+</body>
+</html>
